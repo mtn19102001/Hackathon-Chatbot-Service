@@ -32,6 +32,43 @@ The service consists of three main components:
 2. Context Service - Manages user context and conversation history
 3. LLM Integration - Connects with OpenAI's GPT models
 
+### Sequence Diagram
+
+```plantuml
+@startuml
+title Chatbot Service - Sequence Diagram
+
+actor User
+participant "Chatbot Service" as Chat
+participant "Context Service" as Context
+participant "LLM API" as LLM
+database "PostgreSQL" as DB
+
+User -> Chat : POST /ask\n{ userId, question }
+Chat -> Context : GET /context/{userId}
+Context -> DB : Query user context\nand history
+DB --> Context : Return data
+Context --> Chat : { user context, history }
+
+Chat -> LLM : POST /chat\n{ question, context, history }
+LLM --> Chat : { answer }
+
+Chat -> Context : POST /context/{userId}\n{ question, answer }
+Context -> DB : Save chat history
+DB --> Context : Confirm save
+Context --> Chat : 200 OK
+
+Chat --> User : 200 OK\n{ answer }
+@enduml
+```
+
+This sequence diagram illustrates the complete flow of the chatbot service, including:
+1. User sends a question with their ID
+2. Chatbot service retrieves user context and history
+3. Question is processed by LLM with context and history
+4. Answer is saved to history
+5. Response is sent back to user
+
 ## Development Options
 
 You can run this service either locally for development or using Docker containers for deployment.
