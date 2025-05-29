@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/chatbot
+      - CONTEXT_SERVICE_URL=http://context:8001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      context:
+        condition: service_started
+    networks:
+      - chatbot-network
+
+  context:
+    build:
+      context: .
+      dockerfile: Dockerfile.context
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/chatbot
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - chatbot-network
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=chatbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chatbot-network
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - CHATBOT_HOST=chatbot
+      - CONTEXT_HOST=context
+      - DB_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+      chatbot:
+        condition: service_started
+      context:
+        condition: service_started
+    networks:
+      - chatbot-network
+
+volumes:
+  postgres_data:
+
+networks:
+  chatbot-network:
+    driver: bridge 
