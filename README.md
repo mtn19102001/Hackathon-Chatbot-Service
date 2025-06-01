@@ -97,7 +97,7 @@ The service will run on http://localhost:8000
 
 1. Make sure you have Docker and Docker Compose installed.
 
-2. Create a `.env` file with your OpenAI API key:
+2. Create a `.env` file in the docker folder with your OpenAI API key:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
