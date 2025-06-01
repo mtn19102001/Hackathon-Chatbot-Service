@@ -3,8 +3,8 @@ version: '3.8'
 services:
   chatbot:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -21,8 +21,8 @@ services:
 
   context:
     build:
-      context: .
-      dockerfile: Dockerfile.context
+      context: ..
+      dockerfile: docker/Dockerfile.context
     ports:
       - "8001:8001"
     environment:
@@ -53,12 +53,15 @@ services:
 
   test:
     build:
-      context: .
-      dockerfile: Dockerfile.test
+      context: ..
+      dockerfile: docker/Dockerfile.test
     environment:
       - CHATBOT_HOST=chatbot
       - CONTEXT_HOST=context
       - DB_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=chatbot
     depends_on:
       db:
         condition: service_healthy

@@ -2,16 +2,19 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy test files and requirements
-COPY test_services.py .
-COPY test-requirements.txt .
+# Copy test files
+COPY tests/test_services.py ./tests/
+COPY tests/test-requirements.txt .
 
 # Install dependencies
-RUN pip install -r test-requirements.txt
+RUN pip install --no-cache-dir -r test-requirements.txt
 
-# Add wait-for-it script to wait for services
+# Download wait-for-it script
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
-# Command to run tests
-CMD ["/wait-for-it.sh", "db:5432", "--", "/wait-for-it.sh", "chatbot:8000", "--", "/wait-for-it.sh", "context:8001", "--", "pytest", "test_services.py", "-v"] 
+# Run tests
+CMD ["/wait-for-it.sh", "db:5432", "--", \
+     "/wait-for-it.sh", "chatbot:8000", "--", \
+     "/wait-for-it.sh", "context:8001", "--", \
+     "python", "-m", "pytest", "tests/test_services.py", "-v"] 

@@ -14,8 +14,8 @@ from contextlib import asynccontextmanager
 # Load environment variables
 load_dotenv()
 
-# Initialize OpenAI client
-client = OpenAI()  # It will automatically use OPENAI_API_KEY from environment
+# Global variables
+client = None
 
 # Context service URL
 CONTEXT_SERVICE_URL = os.getenv("CONTEXT_SERVICE_URL", "http://localhost:8001")
@@ -44,6 +44,15 @@ async def lifespan(app: FastAPI):
     await database.connect()
     engine = sqlalchemy.create_engine(DATABASE_URL)
     metadata.create_all(engine)
+    
+    # Initialize OpenAI client
+    global client
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key:
+        client = OpenAI(api_key=api_key)
+        print("OpenAI client initialized successfully")
+    else:
+        print("Warning: OPENAI_API_KEY not found, chatbot will use mock responses")
     
     yield
     
@@ -85,6 +94,41 @@ class ChatHistoryItem(BaseModel):
     question: str = Field(..., description="The user's question")
     answer: str = Field(..., description="The chatbot's answer")
     created_at: datetime = Field(..., description="When the interaction occurred")
+
+class ContextResponse(BaseModel):
+    user_id: str = Field(..., description="Unique identifier for the user")
+    preferences: Dict = Field(..., description="User preferences and settings")
+    history: List[ChatHistoryItem] = Field(default=[], description="Recent chat history")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "user_id": "user123",
+                "preferences": {
+                    "current_skills": [
+                        {
+                            "name": "Python",
+                            "proficiency": "intermediate",
+                            "last_used": "2024-02-15",
+                            "years_experience": 2
+                        }
+                    ],
+                    "recommended_skills": [
+                        {
+                            "name": "FastAPI",
+                            "reason": "Complements Python backend development",
+                            "priority": "high",
+                            "estimated_time": "2 weeks"
+                        }
+                    ],
+                    "learning_behavior": {
+                        "preferred_learning_style": "hands-on",
+                        "learning_pace": "moderate"
+                    }
+                },
+                "history": []
+            }
+        }
 
 async def get_user_context(user_id: str) -> dict:
     """
@@ -158,22 +202,21 @@ async def get_llm_response(question: str, context: dict) -> str:
     """
     # Mock responses for testing or when API is unavailable
     mock_responses = {
-        "hello": "Hello! How can I help you today?",
-        "how are you": "I'm functioning well, thank you for asking! How can I assist you?",
-        "what is machine learning": "Mock response: Machine learning is a branch of artificial intelligence that enables computers to learn from data without being explicitly programmed.",
-        "what is your name": "I am a test chatbot. Note that this is a mock response for testing purposes.",
+        "hello": "We're sorry, but we're experiencing a technical issue with our learning assistant at the moment. Please try again later or contact support for assistance. In the meantime, you can explore our recommended courses or review your learning progress in your dashboard."
     }
     
-    # Check if OpenAI API key exists and try to use it
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+    # Check if OpenAI client is available
+    print(f"OpenAI client status: {client is not None}")
+    if not client:
+        print("OpenAI client is not available, using mock response")
         # No API key, use mock response
         return mock_responses.get(
             question.lower().strip(),
-            f"This is a mock response for testing. Your question was: '{question}'. In production, this would be answered by the AI model."
+            "We're sorry, but we're experiencing a technical issue with our learning assistant at the moment. Please try again later or contact support for assistance. In the meantime, you can explore our recommended courses or review your learning progress in your dashboard."
         )
     
     try:
+        print("Getting chat history...")
         # Get recent chat history from our database
         query = chat_history.select()\
             .where(chat_history.c.user_id == context["user_id"])\
@@ -181,6 +224,7 @@ async def get_llm_response(question: str, context: dict) -> str:
             .limit(5)
         
         recent_history = await database.fetch_all(query)
+        print(f"Found {len(recent_history)} chat history items")
         
         # Format chat history
         history_context = "\n".join([
@@ -188,29 +232,62 @@ async def get_llm_response(question: str, context: dict) -> str:
             for h in recent_history
         ])
         
-        system_message = (
-            f"User context: {json.dumps(context['preferences'])}\n\n"
-            f"Previous conversation:\n{history_context}"
-        )
+        print("Formatting user context...")
+        # Format user context for better readability
+        user_preferences = context.get('preferences', {})
+        formatted_context = {
+            "Current Skills": user_preferences.get('current_skills', []),
+            "Recommended Skills": user_preferences.get('recommended_skills', []),
+            "Learning Progress": user_preferences.get('learning_progress', {}),
+            "Learning Behavior": user_preferences.get('learning_behavior', {}),
+            "Constraints": user_preferences.get('constraints', {})
+        }
+        print(f"User context: {json.dumps(formatted_context, indent=2)}")
+        
+        system_message = "You are a learning assistant. Answer questions based on the user's context."
+        user_message = f"Given this context about me:\n{json.dumps(formatted_context, indent=2)}\n\nMy question is: {question}"
         
         messages = [
             {"role": "system", "content": system_message},
-            {"role": "user", "content": question}
+            {"role": "user", "content": user_message}
         ]
         
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages
-        )
+        print("Messages being sent to OpenAI:")
+        for msg in messages:
+            print(f"Role: {msg['role']}")
+            print(f"Content: {msg['content']}\n")
         
-        return response.choices[0].message.content
+        print("Sending request to OpenAI...")
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                temperature=0.7,  # Slightly creative but still focused
+                max_tokens=500    # Reasonable response length
+            )
+            print("Got response from OpenAI")
+            print(f"Response: {response}")
+            print(f"Response type: {type(response)}")
+            print(f"Response dir: {dir(response)}")
+            
+            if hasattr(response, 'choices') and len(response.choices) > 0 and hasattr(response.choices[0], 'message'):
+                print(f"Message content: {response.choices[0].message.content}")
+                return response.choices[0].message.content
+            else:
+                print("Invalid response format from OpenAI")
+                raise Exception("Invalid response format from OpenAI API")
+        except Exception as api_error:
+            print(f"OpenAI API error: {str(api_error)}")
+            raise HTTPException(status_code=500, detail=f"OpenAI API error: {str(api_error)}")
+            
     except Exception as e:
         error_str = str(e)
+        print(f"Error in get_llm_response: {error_str}")
         if "insufficient_quota" in error_str or "Rate limit" in error_str:
             # API quota exceeded or rate limited, fall back to mock response
             return mock_responses.get(
                 question.lower().strip(),
-                f"API quota exceeded. Mock response: Your question was: '{question}'. In production, this would be answered by the AI model."
+                "Our learning assistant is temporarily unavailable due to high demand. Please try again later or check out your personalized course recommendations in your dashboard. If the issue persists, feel free to contact support for help."
             )
         else:
             # Other API errors
@@ -233,6 +310,41 @@ async def root():
             "history": "/history/{user_id} - Get chat history (GET)"
         }
     }
+
+@app.get("/context/{user_id}",
+    response_model=ContextResponse,
+    summary="Get user context and chat history",
+    description="Retrieve a user's context, preferences, and recent chat history from the context service.",
+    tags=["Context"]
+)
+async def get_user_context_endpoint(user_id: str):
+    try:
+        # Get context from context service
+        context = await get_user_context(user_id)
+        
+        # Get recent chat history from our database
+        query = chat_history.select()\
+            .where(chat_history.c.user_id == user_id)\
+            .order_by(chat_history.c.created_at.desc())\
+            .limit(10)
+        
+        history = await database.fetch_all(query)
+        
+        # Format the response
+        return ContextResponse(
+            user_id=user_id,
+            preferences=context.get('preferences', {}),
+            history=[
+                ChatHistoryItem(
+                    question=h.question,
+                    answer=h.answer,
+                    created_at=h.created_at
+                )
+                for h in history
+            ]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get user context: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
