@@ -69,7 +69,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 DATABASE_URL=postgresql://your_username@localhost/chatbot
 
 # Context Service URL (optional, defaults to http://localhost:8001)
-# CONTEXT_SERVICE_URL=http://localhost:8001
+CONTEXT_SERVICE_URL=http://localhost:8001
 ```
 
 4. Install PostgreSQL (if not already installed):
@@ -87,7 +87,13 @@ brew services start postgresql
 createdb chatbot
 ```
 
-7. Start the Chatbot Service:
+7. Start the Context Service:
+```bash
+python app/context_service.py
+```
+The service will run on http://localhost:8001
+
+8. Start the Chatbot Service:
 ```bash
 python app/main.py
 ```
@@ -97,8 +103,17 @@ The service will run on http://localhost:8000
 
 1. Make sure you have Docker and Docker Compose installed.
 
-2. Create a `.env` file in the docker folder with your OpenAI API key:
+2. Create a `.env` file in the docker folder:
 ```
+# Database Configuration (required)
+POSTGRES_USER=your_postgres_username    # e.g., postgres
+POSTGRES_PASSWORD=your_secure_password  # Choose a secure password
+POSTGRES_DB=chatbot                    # Database name
+
+# Context Service URL (optional, defaults to http://localhost:8001)
+CONTEXT_SERVICE_URL=http://localhost:8001
+
+# OpenAI Configuration (required)
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
