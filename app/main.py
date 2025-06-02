@@ -96,36 +96,60 @@ class ChatHistoryItem(BaseModel):
     created_at: datetime = Field(..., description="When the interaction occurred")
 
 class ContextResponse(BaseModel):
-    user_id: str = Field(..., description="Unique identifier for the user")
-    preferences: Dict = Field(..., description="User preferences and settings")
+    id: int = Field(..., description="Unique identifier for the context")
+    learning_preferences: Dict = Field(default={}, description="User learning preferences")
+    constraints: Dict = Field(default={}, description="User constraints")
+    background: Dict = Field(default={}, description="User background information")
+    skills: List[Dict] = Field(default=[], description="User's skills")
+    progresses: List[Dict] = Field(default=[], description="User's learning progress")
     history: List[ChatHistoryItem] = Field(default=[], description="Recent chat history")
 
     class Config:
         schema_extra = {
             "example": {
-                "user_id": "user123",
-                "preferences": {
-                    "current_skills": [
-                        {
-                            "name": "Python",
-                            "proficiency": "intermediate",
-                            "last_used": "2024-02-15",
-                            "years_experience": 2
-                        }
-                    ],
-                    "recommended_skills": [
-                        {
-                            "name": "FastAPI",
-                            "reason": "Complements Python backend development",
-                            "priority": "high",
-                            "estimated_time": "2 weeks"
-                        }
-                    ],
-                    "learning_behavior": {
-                        "preferred_learning_style": "hands-on",
-                        "learning_pace": "moderate"
+                "id": 1,
+                "learning_preferences": {
+                    "preferred_learning_style": "visual",
+                    "time_availability": {
+                        "hours_per_week": 6,
+                        "preferred_schedule": "weekdays"
                     }
                 },
+                "constraints": {
+                    "time_constraints": 9,
+                    "budget_constraints": 10
+                },
+                "background": {
+                    "education_level": "Bachelor's",
+                    "work_experience_years": "3",
+                    "current_role": "Software Developer",
+                    "industry": "Technology"
+                },
+                "skills": [
+                    {
+                        "id": 1,
+                        "name": "python",
+                        "category": "programming",
+                        "level": "intermediate",
+                        "description": "Python programming language proficiency"
+                    }
+                ],
+                "progresses": [
+                    {
+                        "target": {
+                            "id": 1,
+                            "title": "Backend Developer",
+                            "type": "Career Path",
+                            "description": "Backend development specialization"
+                        },
+                        "learning_path": {
+                            "id": 1,
+                            "title": "Python Expert Path",
+                            "progress": 60,
+                            "completion_date": "2025-06-13T16:09:02.736Z"
+                        }
+                    }
+                ],
                 "history": []
             }
         }
@@ -138,11 +162,38 @@ async def get_user_context(user_id: str) -> dict:
         try:
             response = await client.get(f"{CONTEXT_SERVICE_URL}/context/{user_id}")
             if response.status_code == 200:
-                return response.json()
-            return {"user_id": user_id, "preferences": {}, "history": []}
+                context_data = response.json()
+                # Ensure we have all required fields
+                return {
+                    "id": context_data.get("id"),  # Include the context ID
+                    "user_id": context_data.get("user_id", user_id),
+                    "learning_preferences": context_data.get("learning_preferences", {}),
+                    "constraints": context_data.get("constraints", {}),
+                    "background": context_data.get("background", {}),
+                    "skills": context_data.get("skills", []),
+                    "progresses": context_data.get("progresses", [])
+                }
+            return {
+                "id": 0,  # Default ID for non-existent context
+                "user_id": user_id,
+                "learning_preferences": {},
+                "constraints": {},
+                "background": {},
+                "skills": [],
+                "progresses": []
+            }
         except Exception as e:
-            # If context service is unavailable, return empty context
-            return {"user_id": user_id, "preferences": {}, "history": []}
+            print(f"Error getting user context: {str(e)}")
+            # If context service is unavailable, return empty context with default ID
+            return {
+                "id": 0,
+                "user_id": user_id,
+                "learning_preferences": {},
+                "constraints": {},
+                "background": {},
+                "skills": [],
+                "progresses": []
+            }
 
 @app.get("/history/{user_id}",
     response_model=List[ChatHistoryItem],
@@ -209,7 +260,6 @@ async def get_llm_response(question: str, context: dict) -> str:
     print(f"OpenAI client status: {client is not None}")
     if not client:
         print("OpenAI client is not available, using mock response")
-        # No API key, use mock response
         return mock_responses.get(
             question.lower().strip(),
             "We're sorry, but we're experiencing a technical issue with our learning assistant at the moment. Please try again later or contact support for assistance. In the meantime, you can explore our recommended courses or review your learning progress in your dashboard."
@@ -234,17 +284,54 @@ async def get_llm_response(question: str, context: dict) -> str:
         
         print("Formatting user context...")
         # Format user context for better readability
-        user_preferences = context.get('preferences', {})
         formatted_context = {
-            "Current Skills": user_preferences.get('current_skills', []),
-            "Recommended Skills": user_preferences.get('recommended_skills', []),
-            "Learning Progress": user_preferences.get('learning_progress', {}),
-            "Learning Behavior": user_preferences.get('learning_behavior', {}),
-            "Constraints": user_preferences.get('constraints', {})
+            "Context ID": context.get("id"),  # Include context ID in LLM context
+            "Learning Preferences": context.get("learning_preferences", {}),
+            "Constraints": context.get("constraints", {}),
+            "Background": context.get("background", {}),
+            "Current Skills": context.get("skills", []),
+            "Learning Progress": []
         }
+
+        # Format progress information
+        for progress in context.get("progresses", []):
+            target = progress.get("target", {})
+            learning_path = progress.get("learning_path", {})
+            formatted_progress = {
+                "Career Target": target.get("title"),
+                "Learning Path": learning_path.get("title"),
+                "Progress": f"{learning_path.get('progress')}%",
+                "Expected Completion": learning_path.get("completion_date"),
+                "Learned Skills": [
+                    {
+                        "name": skill.get("skill", {}).get("name"),
+                        "level": skill.get("proficiency_level"),
+                        "status": skill.get("status")
+                    }
+                    for skill in learning_path.get("learned_skills", [])
+                ],
+                "Skills To Learn": [
+                    {
+                        "name": skill.get("skill", {}).get("name"),
+                        "target_level": skill.get("proficiency_level"),
+                        "status": skill.get("status")
+                    }
+                    for skill in learning_path.get("to_learn_skills", [])
+                ]
+            }
+            formatted_context["Learning Progress"].append(formatted_progress)
+
         print(f"User context: {json.dumps(formatted_context, indent=2)}")
         
-        system_message = "You are a learning assistant. Answer questions based on the user's context."
+        system_message = """You are a learning assistant. Use the provided context to give personalized responses.
+Focus on the user's:
+1. Current skills and their levels
+2. Learning preferences and constraints
+3. Career targets and learning progress
+4. Recommended next steps based on their learning path
+
+Always be specific and reference the user's actual data."""
+
         user_message = f"Given this context about me:\n{json.dumps(formatted_context, indent=2)}\n\nMy question is: {question}"
         
         messages = [
@@ -262,16 +349,12 @@ async def get_llm_response(question: str, context: dict) -> str:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=messages,
-                temperature=0.7,  # Slightly creative but still focused
-                max_tokens=500    # Reasonable response length
+                temperature=0.7,
+                max_tokens=500
             )
             print("Got response from OpenAI")
-            print(f"Response: {response}")
-            print(f"Response type: {type(response)}")
-            print(f"Response dir: {dir(response)}")
             
-            if hasattr(response, 'choices') and len(response.choices) > 0 and hasattr(response.choices[0], 'message'):
-                print(f"Message content: {response.choices[0].message.content}")
+            if hasattr(response, "choices") and len(response.choices) > 0 and hasattr(response.choices[0], "message"):
                 return response.choices[0].message.content
             else:
                 print("Invalid response format from OpenAI")
@@ -284,13 +367,11 @@ async def get_llm_response(question: str, context: dict) -> str:
         error_str = str(e)
         print(f"Error in get_llm_response: {error_str}")
         if "insufficient_quota" in error_str or "Rate limit" in error_str:
-            # API quota exceeded or rate limited, fall back to mock response
             return mock_responses.get(
                 question.lower().strip(),
                 "Our learning assistant is temporarily unavailable due to high demand. Please try again later or check out your personalized course recommendations in your dashboard. If the issue persists, feel free to contact support for help."
             )
         else:
-            # Other API errors
             raise HTTPException(status_code=500, detail=f"LLM API error: {error_str}")
 
 @app.get("/",
@@ -332,8 +413,12 @@ async def get_user_context_endpoint(user_id: str):
         
         # Format the response
         return ContextResponse(
-            user_id=user_id,
-            preferences=context.get('preferences', {}),
+            id=context["id"],
+            learning_preferences=context.get("learning_preferences", {}),
+            constraints=context.get("constraints", {}),
+            background=context.get("background", {}),
+            skills=context.get("skills", []),
+            progresses=context.get("progresses", []),
             history=[
                 ChatHistoryItem(
                     question=h.question,
@@ -344,6 +429,7 @@ async def get_user_context_endpoint(user_id: str):
             ]
         )
     except Exception as e:
+        print(f"Error in get_user_context_endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get user context: {str(e)}")
 
 if __name__ == "__main__":

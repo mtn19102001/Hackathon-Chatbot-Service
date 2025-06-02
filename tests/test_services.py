@@ -70,9 +70,22 @@ def test_context_service():
         f"{CONTEXT_URL}/context/{user_id}",
         json={
             "user_id": user_id,
-            "preferences": {
-                "language": "en",
-                "style": "friendly"
+            "learning_preferences": {
+                "preferred_learning_style": "visual",
+                "time_availability": {
+                    "hours_per_week": 6,
+                    "preferred_schedule": "weekdays"
+                }
+            },
+            "constraints": {
+                "time_constraints": 9,
+                "budget_constraints": 10
+            },
+            "background": {
+                "education_level": "Bachelor's",
+                "work_experience_years": "3",
+                "current_role": "Software Developer",
+                "industry": "Technology"
             }
         }
     )
@@ -83,8 +96,19 @@ def test_context_service():
     assert get_response.status_code == 200, "Failed to get context"
     
     context_data = get_response.json()
-    assert context_data["user_id"] == user_id, "User ID mismatch"
-    assert context_data["preferences"]["language"] == "en", "Preferences not saved correctly"
+    assert "id" in context_data, "Context ID missing in response"
+    assert isinstance(context_data["id"], int), "Context ID should be an integer"
+    assert context_data["learning_preferences"]["preferred_learning_style"] == "visual", "Learning preferences not saved correctly"
+    assert context_data["background"]["education_level"] == "Bachelor's", "Background not saved correctly"
+    
+    # Store the context ID for later comparison
+    context_id = context_data["id"]
+    
+    # Get the context again to verify ID consistency
+    second_get_response = requests.get(f"{CONTEXT_URL}/context/{user_id}")
+    assert second_get_response.status_code == 200, "Failed to get context second time"
+    second_context_data = second_get_response.json()
+    assert second_context_data["id"] == context_id, "Context ID changed between requests"
 
 def test_chatbot_service():
     """Test chatbot service endpoints"""
@@ -93,52 +117,145 @@ def test_chatbot_service():
     # First, create a context for the user
     context_data = {
         "user_id": user_id,
-        "preferences": {
-            "current_skills": [
-                {
-                    "name": "Python",
-                    "proficiency": "intermediate",
-                    "last_used": "2024-02-15",
-                    "years_experience": 2
-                }
-            ],
-            "recommended_skills": [
-                {
-                    "name": "FastAPI",
-                    "reason": "Complements Python backend development",
-                    "priority": "high",
-                    "estimated_time": "2 weeks"
-                }
-            ],
-            "learning_behavior": {
-                "preferred_learning_style": "hands-on",
-                "learning_pace": "moderate"
+        "learning_preferences": {
+            "preferred_learning_style": "hands-on",
+            "time_availability": {
+                "hours_per_week": 10,
+                "preferred_schedule": "flexible"
             }
-        }
+        },
+        "constraints": {
+            "time_constraints": 8,
+            "budget_constraints": 15
+        },
+        "background": {
+            "education_level": "Bachelor's",
+            "work_experience_years": "2",
+            "current_role": "Junior Developer",
+            "industry": "Technology"
+        },
+        "skills": [
+            {
+                "id": 1,
+                "name": "python",
+                "category": "programming",
+                "level": "intermediate",
+                "description": "Python programming language proficiency"
+            }
+        ],
+        "progresses": [
+            {
+                "target": {
+                    "id": 1,
+                    "title": "Backend Developer",
+                    "type": "Career Path",
+                    "description": "Backend development specialization",
+                    "required_skills": [
+                        {
+                            "importance": "must have",
+                            "skill": {
+                                "id": 1,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "expert",
+                                "description": "Advanced Python development"
+                            }
+                        }
+                    ]
+                },
+                "learning_path": {
+                    "id": 1,
+                    "title": "Python Expert Path",
+                    "description": "Advanced Python development path",
+                    "progress": 60,
+                    "completion_date": "2025-06-13T16:09:02.736Z",
+                    "target_id": 1,
+                    "learned_skills": [
+                        {
+                            "proficiency_level": "intermediate",
+                            "resources": [
+                                {
+                                    "type": "course",
+                                    "title": "Python Advanced Concepts",
+                                    "url": "https://example.com",
+                                    "price": "199.99",
+                                    "estimated_hours": "40",
+                                    "description": "Advanced Python programming concepts",
+                                    "provider": "coursera"
+                                }
+                            ],
+                            "status": "done",
+                            "update_date": "2024-07-28T11:44:34.669Z",
+                            "expected_output": "Can build complex applications using Python",
+                            "skill": {
+                                "id": 1,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "intermediate",
+                                "description": "Python programming proficiency"
+                            }
+                        }
+                    ],
+                    "to_learn_skills": [
+                        {
+                            "proficiency_level": "expert",
+                            "resources": [
+                                {
+                                    "type": "course",
+                                    "title": "Python System Design",
+                                    "url": "https://example.com",
+                                    "price": "299.99",
+                                    "estimated_hours": "60",
+                                    "description": "System design with Python",
+                                    "provider": "udemy"
+                                }
+                            ],
+                            "status": "todo",
+                            "expected_output": "Can design and implement complex systems",
+                            "skill": {
+                                "id": 2,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "expert",
+                                "description": "Expert Python development"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
     }
     
-    create_context_response = requests.post(
+    # Create context
+    context_response = requests.post(
         f"{CONTEXT_URL}/context/{user_id}",
         json=context_data
     )
-    assert create_context_response.status_code == 200, "Failed to create context"
+    assert context_response.status_code == 200, "Failed to create initial context"
     
     # Test getting context from chatbot service
     get_context_response = requests.get(f"{CHATBOT_URL}/context/{user_id}")
     assert get_context_response.status_code == 200, "Failed to get context from chatbot service"
     
     context_response_data = get_context_response.json()
-    assert context_response_data["user_id"] == user_id, "User ID mismatch in context response"
-    assert "preferences" in context_response_data, "Context response missing preferences"
+    assert "id" in context_response_data, "Context ID missing in response"
+    assert isinstance(context_response_data["id"], int), "Context ID should be an integer"
+    assert "learning_preferences" in context_response_data, "Context response missing learning preferences"
+    assert "skills" in context_response_data, "Context response missing skills"
+    assert "progresses" in context_response_data, "Context response missing progresses"
     assert "history" in context_response_data, "Context response missing history"
+    
+    # Store the context ID
+    context_id = context_response_data["id"]
     
     # Test getting context for non-existent user
     non_existent_user = "non_existent_user_123"
     error_response = requests.get(f"{CHATBOT_URL}/context/{non_existent_user}")
     assert error_response.status_code == 200, "Should return 200 with empty context for non-existent user"
     error_data = error_response.json()
-    assert error_data["user_id"] == non_existent_user, "User ID mismatch in error response"
-    assert error_data["preferences"] == {}, "Non-existent user should have empty preferences"
+    assert "id" in error_data, "Context ID missing in error response"
+    assert isinstance(error_data["id"], int), "Context ID should be an integer"
+    assert error_data["learning_preferences"] == {}, "Non-existent user should have empty learning preferences"
     assert error_data["history"] == [], "Non-existent user should have empty history"
     
     # Test asking a question
@@ -146,7 +263,7 @@ def test_chatbot_service():
         f"{CHATBOT_URL}/ask",
         json={
             "userId": user_id,
-            "question": "What are my current recommended courses?"
+            "question": "What is my current learning progress?"
         }
     )
     assert question_response.status_code == 200, "Failed to get response from chatbot"
@@ -162,7 +279,7 @@ def test_chatbot_service():
     assert updated_context_response.status_code == 200, "Failed to get updated context"
     updated_context = updated_context_response.json()
     assert len(updated_context["history"]) > 0, "Chat history should be included in context"
-    assert updated_context["history"][0]["question"] == "What are my current recommended courses?", "Question not found in context history"
+    assert updated_context["history"][0]["question"] == "What is my current learning progress?", "Question not found in context history"
 
 def test_context_error_handling():
     """Test error handling for context endpoints"""
@@ -188,63 +305,120 @@ def test_end_to_end_flow():
     # 1. Create initial context with user's background
     initial_context = {
         "user_id": user_id,
-        "preferences": {
-            "current_skills": [
-                {
-                    "name": "Python",
-                    "proficiency": "intermediate",
-                    "last_used": "2024-02-15",
-                    "years_experience": 2
-                },
-                {
-                    "name": "JavaScript",
-                    "proficiency": "beginner",
-                    "last_used": "2024-01-10",
-                    "years_experience": 0.5
-                }
-            ],
-            "recommended_skills": [
-                {
-                    "name": "FastAPI",
-                    "reason": "Complements Python backend development",
-                    "priority": "high",
-                    "estimated_time": "2 weeks"
-                },
-                {
-                    "name": "React",
-                    "reason": "Popular frontend framework",
-                    "priority": "medium",
-                    "estimated_time": "4 weeks"
-                }
-            ],
-            "learning_behavior": {
-                "preferred_learning_style": "hands-on",
-                "learning_pace": "moderate",
-                "study_habits": {
-                    "average_session_duration": "45 minutes",
-                    "preferred_time_of_day": "evening",
-                    "sessions_per_week": 4
-                }
-            },
-            "learning_progress": {
-                "current_courses": [
-                    {
-                        "course_id": "PY201",
-                        "title": "Advanced Python Programming",
-                        "progress": 0.6,
-                        "start_date": "2024-02-01"
-                    }
-                ],
-                "completed_courses": [
-                    {
-                        "course_id": "PY101",
-                        "title": "Python Basics",
-                        "completion_date": "2024-01-15",
-                        "grade": "A"
-                    }
-                ]
+        "learning_preferences": {
+            "preferred_learning_style": "visual",
+            "time_availability": {
+                "hours_per_week": 6,
+                "preferred_schedule": "weekdays"
             }
-        }
+        },
+        "constraints": {
+            "time_constraints": 9,
+            "budget_constraints": 10
+        },
+        "background": {
+            "education_level": "Bachelor's",
+            "work_experience_years": "3",
+            "current_role": "Software Developer",
+            "industry": "Technology"
+        },
+        "skills": [
+            {
+                "id": 1,
+                "name": "python",
+                "category": "programming",
+                "level": "intermediate",
+                "description": "Python programming language proficiency"
+            },
+            {
+                "id": 2,
+                "name": "javascript",
+                "category": "programming",
+                "level": "beginner",
+                "description": "JavaScript programming language basics"
+            }
+        ],
+        "progresses": [
+            {
+                "target": {
+                    "id": 1,
+                    "title": "Backend Developer",
+                    "type": "Career Path",
+                    "description": "Backend development specialization",
+                    "required_skills": [
+                        {
+                            "importance": "must have",
+                            "skill": {
+                                "id": 1,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "expert",
+                                "description": "Advanced Python development"
+                            }
+                        }
+                    ]
+                },
+                "learning_path": {
+                    "id": 1,
+                    "title": "Python Expert Path",
+                    "description": "Advanced Python development path",
+                    "progress": 60,
+                    "completion_date": "2025-06-13T16:09:02.736Z",
+                    "target_id": 1,
+                    "learned_skills": [
+                        {
+                            "proficiency_level": "intermediate",
+                            "resources": [
+                                {
+                                    "type": "course",
+                                    "title": "Python Advanced Concepts",
+                                    "url": "https://example.com",
+                                    "price": "199.99",
+                                    "estimated_hours": "40",
+                                    "description": "Advanced Python programming concepts",
+                                    "provider": "coursera"
+                                }
+                            ],
+                            "status": "done",
+                            "update_date": "2024-07-28T11:44:34.669Z",
+                            "expected_output": "Can build complex applications using Python",
+                            "skill": {
+                                "id": 1,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "intermediate",
+                                "description": "Python programming proficiency"
+                            }
+                        }
+                    ],
+                    "to_learn_skills": [
+                        {
+                            "proficiency_level": "expert",
+                            "resources": [
+                                {
+                                    "type": "course",
+                                    "title": "Python System Design",
+                                    "url": "https://example.com",
+                                    "price": "299.99",
+                                    "estimated_hours": "60",
+                                    "description": "System design with Python",
+                                    "provider": "udemy"
+                                }
+                            ],
+                            "status": "todo",
+                            "expected_output": "Can design and implement complex systems",
+                            "skill": {
+                                "id": 2,
+                                "name": "python",
+                                "category": "programming",
+                                "level": "expert",
+                                "description": "Expert Python development"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
     }
     
     # Create context
@@ -258,25 +432,27 @@ def test_end_to_end_flow():
     get_context_response = requests.get(f"{CHATBOT_URL}/context/{user_id}")
     assert get_context_response.status_code == 200, "Failed to get context"
     context_data = get_context_response.json()
-    assert context_data["preferences"]["current_skills"][0]["name"] == "Python", "Context not saved correctly"
+    assert context_data["learning_preferences"]["preferred_learning_style"] == "visual", "Learning preferences not saved correctly"
+    assert context_data["skills"][0]["name"] == "python", "Skills not saved correctly"
+    assert context_data["progresses"][0]["learning_path"]["progress"] == 60, "Learning path progress not saved correctly"
     
     # 3. Simulate a learning journey with multiple interactions
     conversation_flow = [
         {
-            "question": "What are my recommended next courses based on my current skills?",
-            "verify": lambda answer: "FastAPI" in answer and "React" in answer
+            "question": "What's my current learning progress in Python?",
+            "verify": lambda answer: "60%" in answer or "intermediate" in answer.lower()
         },
         {
-            "question": "Can you tell me about my current progress in Advanced Python Programming?",
-            "verify": lambda answer: "60%" in answer or "0.6" in answer
+            "question": "What skills do I need to learn to become a Backend Developer?",
+            "verify": lambda answer: "expert" in answer.lower() and "python" in answer.lower()
         },
         {
-            "question": "What's my learning pace and preferred study time?",
-            "verify": lambda answer: "evening" in answer.lower() and "moderate" in answer.lower()
+            "question": "What are my learning preferences and constraints?",
+            "verify": lambda answer: "visual" in answer.lower() and "weekdays" in answer.lower()
         },
         {
-            "question": "How am I doing in my JavaScript learning journey?",
-            "verify": lambda answer: "beginner" in answer.lower()
+            "question": "What's my next recommended course in the learning path?",
+            "verify": lambda answer: "system design" in answer.lower() or "python" in answer.lower()
         }
     ]
     
@@ -307,8 +483,9 @@ def test_end_to_end_flow():
     final_context = final_context_response.json()
     
     # Verify context still has original data
-    assert len(final_context["preferences"]["current_skills"]) == 2, "Skills data lost from context"
-    assert final_context["preferences"]["learning_behavior"]["preferred_learning_style"] == "hands-on", "Learning behavior data lost"
+    assert len(final_context["skills"]) == 2, "Skills data lost from context"
+    assert final_context["learning_preferences"]["preferred_learning_style"] == "visual", "Learning preferences data lost"
+    assert final_context["progresses"][0]["learning_path"]["progress"] == 60, "Learning path progress data lost"
     
     # Verify history is included
     assert len(final_context["history"]) == len(conversation_flow), "History not properly included in context"

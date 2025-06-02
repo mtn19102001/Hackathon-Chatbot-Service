@@ -160,94 +160,199 @@ cd docker && docker-compose run --rm test
 
 1. Access the Swagger UI documentation:
 ```
-http://localhost:8000/docs
+http://localhost:8000/docs  # Chatbot Service
+http://localhost:8001/docs  # Context Service
 ```
-
-2. Test the `/ask` endpoint:
-   - Click on the `/ask` endpoint
-   - Click "Try it out"
-   - Enter a request body like:
-     ```json
-     {
-       "userId": "test_user",
-       "question": "hello"
-     }
-     ```
-   - Click "Execute"
-   - View the response
-
-3. Test the `/history/{user_id}` endpoint:
-   - Click on the `/history/{user_id}` endpoint
-   - Click "Try it out"
-   - Enter "test_user" in the user_id field
-   - Click "Execute"
-   - View the chat history
 
 ### API Endpoints
 
 #### Chatbot Service (Port 8000)
 
 - GET `/` - API information and available endpoints
+  ```bash
+  curl http://localhost:8000/
+  ```
+
 - POST `/ask` - Ask a question to the chatbot
-  - Request body: `{"userId": "string", "question": "string"}`
-  - Returns: `{"answer": "string"}`
+  ```bash
+  curl -X POST http://localhost:8000/ask \
+    -H "Content-Type: application/json" \
+    -d '{
+      "userId": "user123",
+      "question": "What is my current learning progress?"
+    }'
+  ```
+  Response:
+  ```json
+  {
+    "answer": "Based on your learning path..."
+  }
+  ```
+
 - GET `/history/{user_id}` - Get chat history for a user
-  - Returns: Array of chat messages with questions and answers
+  ```bash
+  curl http://localhost:8000/history/user123
+  ```
+  Response:
+  ```json
+  [
+    {
+      "question": "What is my current learning progress?",
+      "answer": "Based on your learning path...",
+      "created_at": "2024-03-21T10:30:00.000Z"
+    }
+  ]
+  ```
+
+- GET `/context/{user_id}` - Get user's context and chat history
+  ```bash
+  curl http://localhost:8000/context/user123
+  ```
+  Response:
+  ```json
+  {
+    "id": 1,
+    "learning_preferences": {
+      "preferred_learning_style": "visual",
+      "time_availability": {
+        "hours_per_week": 6,
+        "preferred_schedule": "weekdays"
+      }
+    },
+    "constraints": {
+      "time_constraints": 9,
+      "budget_constraints": 10
+    },
+    "background": {
+      "education_level": "Bachelor's",
+      "work_experience_years": "3",
+      "current_role": "Software Developer",
+      "industry": "Technology"
+    },
+    "skills": [
+      {
+        "id": 1,
+        "name": "python",
+        "category": "programming",
+        "level": "intermediate",
+        "description": "Python programming language proficiency"
+      }
+    ],
+    "progresses": [
+      {
+        "target": {
+          "id": 1,
+          "title": "Backend Developer",
+          "type": "Career Path",
+          "description": "Backend development specialization"
+        },
+        "learning_path": {
+          "id": 1,
+          "title": "Python Expert Path",
+          "progress": 60,
+          "completion_date": "2025-06-13T16:09:02.736Z"
+        }
+      }
+    ],
+    "history": [
+      {
+        "question": "What is my current learning progress?",
+        "answer": "Based on your learning path...",
+        "created_at": "2024-03-21T10:30:00.000Z"
+      }
+    ]
+  }
+  ```
+
+#### Context Service (Port 8001)
+
+- GET `/context/{user_id}` - Get user's context
+  ```bash
+  curl http://localhost:8001/context/user123
+  ```
+  Response: Same structure as Chatbot Service's `/context/{user_id}` endpoint
+
+- POST `/context/{user_id}` - Update user's context
+  ```bash
+  curl -X POST http://localhost:8001/context/user123 \
+    -H "Content-Type: application/json" \
+    -d '{
+      "user_id": "user123",
+      "learning_preferences": {
+        "preferred_learning_style": "visual",
+        "time_availability": {
+          "hours_per_week": 6,
+          "preferred_schedule": "weekdays"
+        }
+      },
+      "constraints": {
+        "time_constraints": 9,
+        "budget_constraints": 10
+      },
+      "background": {
+        "education_level": "Bachelor'\''s",
+        "work_experience_years": "3",
+        "current_role": "Software Developer",
+        "industry": "Technology"
+      },
+      "skills": [
+        {
+          "id": 1,
+          "name": "python",
+          "category": "programming",
+          "level": "intermediate",
+          "description": "Python programming language proficiency"
+        }
+      ],
+      "progresses": [
+        {
+          "target": {
+            "id": 1,
+            "title": "Backend Developer",
+            "type": "Career Path",
+            "description": "Backend development specialization"
+          },
+          "learning_path": {
+            "id": 1,
+            "title": "Python Expert Path",
+            "progress": 60,
+            "completion_date": "2025-06-13T16:09:02.736Z"
+          }
+        }
+      ]
+    }'
+  ```
+  Response:
+  ```json
+  {
+    "status": "success",
+    "message": "Context updated successfully"
+  }
+  ```
+
+- POST `/chat/{user_id}` - Store a chat message
+  ```bash
+  curl -X POST http://localhost:8001/chat/user123 \
+    -H "Content-Type: application/json" \
+    -d '{
+      "user_id": "user123",
+      "question": "What is my learning progress?",
+      "answer": "Based on your context..."
+    }'
+  ```
+  Response:
+  ```json
+  {
+    "status": "success",
+    "message": "Chat message added successfully"
+  }
+  ```
 
 #### Documentation
 
 - `/docs` - Swagger UI documentation (interactive)
 - `/redoc` - ReDoc documentation (alternative view)
 
-#### Context Service (Port 8001)
-
-- GET `/context/{user_id}`
-  - Returns the user's context
-- POST `/context/{user_id}`
-  - Updates the user's context
-  - Request body: `{"user_id": "string", "preferences": {}, "history": []}`
-
 ### Database Verification
 
-The project includes a database testing script (`tests/test_database.py`) for local development. Install the additional requirement:
-
-```bash
-pip install tabulate
-```
-
-Use the script in different ways:
-
-1. Show all information:
-```bash
-python tests/test_database.py
-```
-
-2. Show statistics only:
-```bash
-python tests/test_database.py --stats
-```
-
-3. Show all chat history:
-```bash
-python tests/test_database.py --all
-```
-
-4. Show chat history for a specific user:
-```bash
-python tests/test_database.py --user test_user
-```
-
-Suggested testing sequence:
-
-1. Start with an empty database
-2. Make a test request in Swagger UI
-3. Check the database with the testing script
-4. Make more requests with different users/questions
-5. View statistics
-
-The script will show you:
-- Total number of conversations
-- Number of unique users
-- Latest conversation
-- Most active user
-- Detailed chat history with timestamps 
+The project includes a database testing script (`

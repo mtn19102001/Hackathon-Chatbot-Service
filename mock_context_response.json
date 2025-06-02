@@ -1,0 +1,314 @@
+{
+  "id": 3,
+  "learning_preferences": {
+    "preferred_learning_style": "visualy",
+    "time_availability": {
+      "hours_per_week": 6,
+      "preferred_schedule": "weekdays"
+    }
+  },
+  "constraints": {
+    "time_constraints": 9,
+    "budget_constraints": "{{$number.int(min=1,max=5,multipleOf=10)}}"
+  },
+  "background": {
+    "education_level": "minim exercitation",
+    "work_experience_years": "officia magna Excepteur ut",
+    "current_role": "sit ipsum ullamco in",
+    "industry": "aliqua eiusmod"
+  },
+  "skills": [
+    {
+      "id": 5,
+      "name": "go",
+      "category": "framework",
+      "level": "intermediate",
+      "description": "Veniam decumbo textilis. Cibus ars vesica desipio utpote optio aurum tremo terebro astrum. Thesis villa tergiversatio peior tergum."
+    },
+    {
+      "id": 1,
+      "name": "php",
+      "category": "framework",
+      "level": "advanced",
+      "description": "Acies suasoria acidus stabilis quae eveniet nostrum vinculum dolorem. Abundans calco ademptio surculus consequuntur tripudio commodo."
+    },
+    {
+      "id": 4,
+      "name": "php",
+      "category": "programing",
+      "level": "expert",
+      "description": "Temporibus utor stipes bellum vetus odio desipio collum quae. Arca spero sursum accusator quaerat repellendus approbo desino."
+    }
+  ],
+  "progresses": [
+    {
+      "target": {
+        "id": 4,
+        "title": "Backend",
+        "type": "JD",
+        "description": "Who responsible for designing a new system",
+        "required_skills": [
+          {
+            "importance": "must have",
+            "skill": {
+              "id": 2,
+              "name": "python",
+              "category": "framework",
+              "level": "expert",
+              "description": "Corrumpo adflicto conservo auditor aqua cornu texo est. Caries trucido thesis volubilis thymbra."
+            }
+          },
+          {
+            "importance": "nice to have",
+            "skill": {
+              "id": 1,
+              "name": "c++",
+              "category": "programing",
+              "level": "intermediate",
+              "description": "Collum vir ubi harum sequi. Aegrotatio terreo conor officia ulterius correptius capto decumbo verbera. Utor tenax cultellus apparatus."
+            }
+          },
+          {
+            "importance": "nice to have",
+            "skill": {
+              "id": 1,
+              "name": "python",
+              "category": "framework",
+              "level": "advanced",
+              "description": "Audacia aedificium adsuesco dicta. Apparatus civis barba curriculum campana aequitas absens acsi via concido."
+            }
+          },
+          {
+            "importance": "preferred",
+            "skill": {
+              "id": 1,
+              "name": "java",
+              "category": "programing",
+              "level": "expert",
+              "description": "Aeger cimentarius astrum adfectus audeo suadeo defluo. Modi aequitas dedecor ullam cognomen velociter depulso vomito."
+            }
+          },
+          {
+            "importance": "preferred",
+            "skill": {
+              "id": 3,
+              "name": "nodejs",
+              "category": "programing",
+              "level": "expert",
+              "description": "Sunt sonitus non voluptatem debeo maxime sum. Substantia arbitro ademptio aliquam callide vinco chirographum. Acsi corrupti occaecati clamo ab vulgus vae testimonium adhaero."
+            }
+          }
+        ]
+      },
+      "learning_path": {
+        "id": 1,
+        "title": "Adipisci statua tabula calcar.",
+        "description": "Veritas verbera vox stella tribuo.",
+        "progress": 58,
+        "completion_date": "2025-06-13T16:09:02.736Z",
+        "target_id": 1,
+        "learned_skills": [
+          {
+            "proficiency_level": "expert",
+            "resources": [
+              {
+                "type": "course",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "937.62",
+                "estimated_hours": "incididunt consectetur do",
+                "description": "Defleo cur adnuo ulciscor. Comis vespillo temporibus cetera comparo subvenio cura beatae. Tergo attero vero aestivus cotidie officia. Acervus adfectus angelus abduco apparatus vulticulus. Volubilis alioqui peior valetudo sponte. Socius qui eos velit deprimo damnatio surculus vir ciminatio. Curvo suppellex calco aeger.",
+                "provider": "coursera"
+              },
+              {
+                "type": "book",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "193.69",
+                "estimated_hours": "fugiat do",
+                "description": "Quidem sonitus aetas utor. Comptus cauda ambulo id ea conforto admoveo. Vulnero tondeo tamdiu creo cibo. Vesco tardus tubineus cognomen umbra tondeo truculenter necessitatibus ultio super. Error traho cibo viscus aptus ventosus. Cauda vorago praesentium quisquam arbitro tabula repellat. Validus dignissimos contigo usque. Comitatus vapulus patria.",
+                "provider": "udemy"
+              },
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "699.69",
+                "estimated_hours": "dolor",
+                "description": "Facere tutamen adamo benevolentia necessitatibus cohaero vere ventus carbo. Maxime tamen nulla acies. Conor sodalitas dolorum tot adimpleo totidem. Deinde apparatus dedecor. Cursus defendo cauda tergeo sopor aperio cauda suscipio delicate compono. Totidem minima spiritus. Curatio ocer deserunt cernuus conforto.",
+                "provider": "aws academy"
+              }
+            ],
+            "user_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "status": "done",
+            "update_date": "2025-05-02T01:37:21.524Z",
+            "expected_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "skill": {
+              "id": 2,
+              "name": "java",
+              "category": "programing",
+              "level": "advanced",
+              "description": "Uterque trado consuasor conforto vulgo sulum demoror creta. Quod artificiose tracto."
+            }
+          },
+          {
+            "proficiency_level": "expert",
+            "resources": [
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "49.39",
+                "estimated_hours": "enim magna",
+                "description": "Cena succedo adnuo. Pauci armarium succurro coerceo adsuesco auctus abscido illum curo callide. Utique undique culpo thema ambitus vilicus. Ager vomito dapifer. Voluptatibus caelestis ulterius statua tempora volva. Complectus talio candidus amplitudo deleniti incidunt denuo. Vetus comparo aureus adfectus urbs. Laboriosam succedo minima cupiditate callide versus.",
+                "provider": "aws academy"
+              },
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "582.89",
+                "estimated_hours": "consectetur",
+                "description": "Condico aegre verto rem quasi cur vilitas spero sordeo. Esse adicio similique sumo distinctio abscido absconditus.",
+                "provider": "udemy"
+              }
+            ],
+            "user_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "status": "done",
+            "update_date": "2025-05-21T15:32:37.222Z",
+            "expected_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "skill": {
+              "id": 3,
+              "name": "nodejs",
+              "category": "programing",
+              "level": "beginner",
+              "description": "Admiratio autem usitas arguo apostolus defendo minima tertius cura tabgo. Beneficium aspicio tumultus supellex benevolentia usus minima optio."
+            }
+          },
+          {
+            "proficiency_level": "intermediate",
+            "resources": [
+              {
+                "type": "course",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "881.00",
+                "estimated_hours": "fugiat officia nulla in",
+                "description": "Quos quaerat pectus tepidus conventus dedico aureus consectetur contra voluptatem. Viduo ducimus credo ambulo benevolentia. Nam spoliatio vinculum vulnero vulnero victoria pax somniculosus quam. Succurro tempus creber autem ademptio depulso vado. Stabilis defendo iusto excepturi tondeo torrens. Pariatur aequus vindico conservo caelum curia caveo vito balbus subito. Cedo laudantium molestias termes casso audax depopulo delinquo audacia. Absorbeo usque amo strues strenuus tremo.",
+                "provider": "aws academy"
+              },
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "165.29",
+                "estimated_hours": "culpa",
+                "description": "Unde turba corporis deripio acerbitas audacia verbera pectus defendo suppono. Tepidus terebro conculco tandem callide calcar. Cicuta thesaurus tyrannus tabgo torqueo degenero adsuesco adimpleo eius pauper.",
+                "provider": "coursera"
+              },
+              {
+                "type": "course",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "763.19",
+                "estimated_hours": "consectetur eiusmod sit sunt",
+                "description": "Causa triduana cogito auctus valetudo caelestis. Numquam comptus auditor theatrum. Conduco molestiae attonbitus conventus despecto. Commemoro tendo aveho barba coruscus. Apparatus auctus corporis decet commodo vis harum. Spes terebro officiis deinde currus commemoro vado absconditus iure deleo. Correptius enim clarus amissio laboriosam uxor.",
+                "provider": "coursera"
+              }
+            ],
+            "user_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "status": "done",
+            "update_date": "2024-07-28T11:44:34.669Z",
+            "expected_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "skill": {
+              "id": 2,
+              "name": "java",
+              "category": "programing",
+              "level": "advanced",
+              "description": "Attonbitus succurro canonicus comparo vallum. Amoveo timor thesaurus ambitus utilis curo cupiditate curto vestrum aegre. Voco alius facere peior avarus surculus abscido sint aranea."
+            }
+          }
+        ],
+        "to_learn_skills": [
+          {
+            "proficiency_level": "intermediate",
+            "resources": [
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "688.75",
+                "estimated_hours": "dolore aliqua culpa nulla",
+                "description": "Admiratio cultura quos conscendo. Clamo adaugeo repudiandae degero explicabo.",
+                "provider": "udemy"
+              },
+              {
+                "type": "course",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "323.69",
+                "estimated_hours": "est",
+                "description": "Nostrum vitiosus tyrannus tutis. Autem porro angelus tres stillicidium votum accommodo. Cornu ustulo suspendo desparatus caries tyrannus.",
+                "provider": "aws academy"
+              },
+              {
+                "type": "book",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "64.80",
+                "estimated_hours": "amet cillum",
+                "description": "Benigne subnecto tui. Adhuc comes amita sumo. Victus vomica cognatus vox tendo chirographum varietas eaque arceo ara. Commemoro voluptatibus ullam asperiores auctus talus quod benigne. Vilis curtus turba provident debitis tui tremo vere somnus depopulo. Arx beatae thema degero molestias talio. Tergeo cerno carbo adipisci.",
+                "provider": "aws academy"
+              },
+              {
+                "type": "book",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "625.49",
+                "estimated_hours": "sunt eu do Ut laboris",
+                "description": "Calamitas ipsum sit acceptus delectatio ager. Pectus calculus crux desolo accusator copiose.",
+                "provider": "udemy"
+              }
+            ],
+            "user_output": "consequat est sit in minim",
+            "status": "todo",
+            "update_date": "2024-09-02T09:59:01.134Z",
+            "expected_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "skill": {
+              "id": 5,
+              "name": "python",
+              "category": "framework",
+              "level": "intermediate",
+              "description": "Enim caveo doloremque. Teneo collum certe stipes spargo vindico. Viriliter curo terra careo viduo."
+            }
+          },
+          {
+            "proficiency_level": "expert",
+            "resources": [
+              {
+                "type": "video",
+                "title": "python zero to hero",
+                "url": "https://example.com",
+                "price": "468.89",
+                "estimated_hours": "non sunt",
+                "description": "Tener consequatur capillus utroque confido aro aegrus exercitationem. Celebrer tempora adsidue officia degusto certus socius ubi molestiae.",
+                "provider": "coursera"
+              }
+            ],
+            "user_output": "anim incididunt laboris nostrud",
+            "status": "todo",
+            "update_date": "2024-08-17T23:11:09.450Z",
+            "expected_output": " designs and optimizes complex server-side systems with expert-level proficiency in programming.",
+            "skill": {
+              "id": 2,
+              "name": "go",
+              "category": "framework",
+              "level": "beginner",
+              "description": "Pel arx urbs attonbitus advenio. Vergo trado magnam porro vitae comprehendo molestiae avarus."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
