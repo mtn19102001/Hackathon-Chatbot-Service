@@ -1,0 +1,85 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Chat Service Project Guide
+
+## Project Overview
+The main application consists of a FastAPI-based chatbot service that integrates with OpenAI's GPT models and maintains user context. The project is structured with clear separation of concerns and follows modern Python development practices.
+
+## Key Files and Components
+
+### Core Application
+- [app/main.py](mdc:Hackathon/app/main.py) - Main FastAPI application entry point
+- [app/context_service.py](mdc:Hackathon/app/context_service.py) - Context management service
+
+### Configuration and Dependencies
+- [requirements.txt](mdc:Hackathon/requirements.txt) - Core project dependencies
+- [docker/docker-compose.yml](mdc:Hackathon/docker/docker-compose.yml) - Service orchestration configuration
+- [docker/Dockerfile](mdc:Hackathon/docker/Dockerfile) - Main service container definition
+- [docker/Dockerfile.context](mdc:Hackathon/docker/Dockerfile.context) - Context service container definition
+
+## Development Guidelines
+
+### Python Code Style
+- Use Black formatter with 100 character line length
+- Follow PEP 8 conventions
+- Use type hints consistently
+- Organize imports using isort
+- Use double quotes for strings
+- 4 spaces for indentation
+
+### API Development
+- Follow RESTful principles
+- Document all endpoints with FastAPI docstrings
+- Include request/response models using Pydantic
+- Handle errors gracefully with proper status codes
+
+### Testing
+- Write unit tests for all new features
+- Place tests in the [tests/](mdc:Hackathon/tests) directory
+- Follow test naming convention: `test_*.py`
+- Include both positive and negative test cases
+
+### Docker Development
+- Use multi-stage builds for production images
+- Follow Docker best practices for layer caching
+- Keep base images updated
+- Document all environment variables
+
+### Database
+- Use SQLAlchemy for database operations
+- Write explicit database migrations
+- Follow naming conventions for tables and columns
+- Include proper indexes for performance
+
+## Project Structure
+```
+.
+├── app/                    # Main application code
+├── docker/                # Docker configuration
+├── scripts/               # Utility scripts
+├── tests/                # Test suite
+└── docs/                 # Documentation
+```
+
+## Best Practices
+1. Always update requirements.txt when adding new dependencies
+2. Follow semantic versioning for releases
+3. Document API changes in the README
+4. Use environment variables for configuration
+5. Keep the code DRY (Don't Repeat Yourself)
+6. Write meaningful commit messages
+
+## Environment Setup
+Required environment variables:
+- OPENAI_API_KEY
+- DATABASE_URL
+- CONTEXT_SERVICE_URL
+
+## Getting Started
+1. Install dependencies from requirements.txt
+2. Set up environment variables
+3. Run database migrations
+4. Start the services using docker-compose
