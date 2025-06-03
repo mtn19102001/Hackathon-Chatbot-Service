@@ -169,6 +169,63 @@ cd docker && docker-compose up test
 cd docker && docker-compose run --rm test
 ```
 
+## Code Style and Formatting
+
+This project uses Cursor IDE rules (`.cursorrules`) to maintain consistent code style and quality across the codebase.
+
+### Python Code Style
+
+- **Formatter**: Black with line length of 100 characters
+- **Linter**: Flake8 with customized rules
+- **Import Organization**: Enabled with Black profile
+- **Type Checking**: MyPy with strict settings
+
+Key Python style rules:
+- Maximum line length: 100 characters
+- Quote style: Double quotes
+- Indentation: 4 spaces
+- Trailing commas: Required
+- Imports: Automatically sorted and unused imports removed
+
+### YAML, Markdown, and JSON Formatting
+
+- **YAML**:
+  - Formatter: Prettier
+  - Indentation: 2 spaces
+  - Maximum line length: 100 characters
+  - Quote style: Double quotes
+
+- **Markdown**:
+  - Formatter: Prettier
+  - Maximum line length: 100 characters
+  - Trailing punctuation: Required
+  - Prose wrap: Always
+
+- **JSON**:
+  - Formatter: Prettier
+  - Indentation: 2 spaces
+  - Keys: Automatically sorted
+
+### Using the Rules in Cursor IDE
+
+1. The rules are automatically applied when using Cursor IDE
+2. For manual formatting:
+   - Python: Use Black formatter (`black .`)
+   - YAML/Markdown/JSON: Use Prettier with appropriate parser
+3. For type checking:
+   - Run MyPy: `mypy .`
+4. For linting:
+   - Run Flake8: `flake8 .`
+
+### Ignored Files and Directories
+
+The `.cursorrules` configuration automatically ignores common Python artifacts and directories including:
+- Virtual environments (`venv/`, `.venv/`)
+- Cache directories (`__pycache__/`, `.pytest_cache/`)
+- Build artifacts (`build/`, `dist/`, `*.egg-info/`)
+- Test coverage reports (`.coverage`, `htmlcov/`)
+- Environment files (`.env`)
+
 ## API Documentation & Testing
 
 ### Using Swagger UI (Recommended)

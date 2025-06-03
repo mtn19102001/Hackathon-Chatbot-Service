@@ -1,0 +1,195 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Rules Documentation
+
+This document provides detailed information about the code style and formatting rules configured for this project through `.cursorrules`.
+
+## Overview
+
+The cursor rules in this project enforce consistent code style and quality across different file types:
+- Python (`.py`)
+- YAML (`.yml`, `.yaml`)
+- Markdown (`.md`, `.mdc`)
+- JSON (`.json`)
+
+## Python Configuration
+
+### Formatter (Black)
+- Tool: `black`
+- Line Length: 100 characters
+- Configuration:
+  ```json
+  {
+    "formatter": "black",
+    "formatterArgs": ["--line-length", "100"]
+  }
+  ```
+
+### Linter (Flake8)
+- Tool: `flake8`
+- Configuration:
+  ```json
+  {
+    "linter": "flake8",
+    "linterArgs": [
+      "--max-line-length=100",
+      "--extend-ignore=E203",
+      "--exclude=venv/*,__pycache__/*,.pytest_cache/*"
+    ]
+  }
+  ```
+
+### Import Organization
+- Enabled: Yes
+- Profile: Black-compatible
+- Configuration:
+  ```json
+  {
+    "organizeImports": true,
+    "organizeImportsArgs": ["--profile", "black"]
+  }
+  ```
+
+### Type Checking (MyPy)
+- Tool: `mypy`
+- Strict Mode: Enabled
+- Key Settings:
+  - Disallow untyped definitions
+  - Disallow incomplete definitions
+  - Check untyped definitions
+  - Disallow untyped decorators
+  - No implicit optional
+  - Warn about redundant casts
+  - Warn about unused ignores
+  - Warn about return any
+  - Strict optional checking
+  - Strict equality
+
+## YAML Configuration
+
+### Formatter (Prettier)
+- Tool: `prettier`
+- Parser: YAML
+- Configuration:
+  ```json
+  {
+    "formatter": "prettier",
+    "formatterArgs": ["--parser", "yaml"]
+  }
+  ```
+
+### Style Rules
+- Maximum line length: 100 characters
+- Quote style: Double quotes
+- Indentation: 2 spaces
+
+## Markdown Configuration
+
+### Formatter (Prettier)
+- Tool: `prettier`
+- Parser: Markdown
+- Prose Wrap: Always
+- Configuration:
+  ```json
+  {
+    "formatter": "prettier",
+    "formatterArgs": ["--parser", "markdown", "--prose-wrap", "always"]
+  }
+  ```
+
+### Style Rules
+- Maximum line length: 100 characters
+- Trailing punctuation: Required
+
+## JSON Configuration
+
+### Formatter (Prettier)
+- Tool: `prettier`
+- Parser: JSON
+- Configuration:
+  ```json
+  {
+    "formatter": "prettier",
+    "formatterArgs": ["--parser", "json"]
+  }
+  ```
+
+### Style Rules
+- Indentation: 2 spaces
+- Sort keys: Enabled
+
+## Ignored Patterns
+
+The following patterns are excluded from formatting and linting:
+
+### Development Environment
+- `venv/**/*`
+- `.venv`
+- `env/**/*`
+- `ENV/**/*`
+
+### Cache Files
+- `__pycache__/**/*`
+- `.pytest_cache/**/*`
+- `.cache`
+- `.mypy_cache/**/*`
+- `.pyre/**/*`
+- `.pytype/**/*`
+
+### Build Artifacts
+- `*.pyc`
+- `*.pyo`
+- `*.pyd`
+- `.Python`
+- `build/**/*`
+- `dist/**/*`
+- `*.egg-info/**/*`
+- `.installed.cfg`
+- `*.egg`
+- `MANIFEST`
+
+### Test Coverage
+- `.coverage`
+- `.coverage.*`
+- `coverage.xml`
+- `*.cover`
+- `*.py,cover`
+- `.hypothesis/**/*`
+- `htmlcov/**/*`
+
+### Documentation
+- `docs/_build/**/*`
+
+### Environment Files
+- `.env`
+
+### Testing
+- `.tox/**/*`
+- `.nox/**/*`
+
+## Usage
+
+### Automatic Formatting
+Cursor IDE will automatically apply these rules when:
+1. Saving files
+2. Formatting documents
+3. Organizing imports
+
+### Manual Commands
+You can also run the formatters manually:
+
+```bash
+# Python
+black .
+flake8 .
+mypy .
+
+# YAML/Markdown/JSON
+prettier --write "**/*.{yml,yaml,md,mdc,json}"
+```
+
+### Integration
+These rules are automatically picked up by Cursor IDE. No additional configuration is needed beyond the `.cursorrules` file in your project root.
